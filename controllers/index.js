@@ -1,9 +1,15 @@
 const mongoose = require("mongoose");
 const User = mongoose.model("User");
+const IpAddress = mongoose.model("IpAddress");
 const promisify = require("es6-promisify");
 
 exports.home = (req, res) => {
   res.send("You might want to go to /register maybe");
+};
+
+exports.checkCaptcha = async (req, res, next) => {
+  // TODO
+  next();
 };
 
 exports.registerForm = (req, res) => {
@@ -38,5 +44,21 @@ exports.register = async (req, res, next) => {
   const user = new User({ email: req.body.email, name: req.body.name });
   const register = promisify(User.register, User);
   await register(user, req.body.password);
+  next();
+};
+
+exports.logIP = async (req, res, next) => {
+  await IpAddress.findOneAndUpdate(
+    {
+      ipAddress: req.ip
+    },
+    {
+      $push: { logins: new Date() }
+    },
+    { 'new': true, 'runValidators': true, 'upsert': true },
+    (err, res) => {
+      console.log("ERRAR", err, res);
+    }
+  ).exec();
   next();
 };
