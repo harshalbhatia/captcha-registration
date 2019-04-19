@@ -1,20 +1,21 @@
-const express = require("express");
-const app = express();
-const port = 3000;
-const bodyParser = require("body-parser");
+const mongoose = require('mongoose');
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+// environment variables
+require('dotenv').config({ path: 'variables.env' });
 
-// parse application/json
-// app.use(bodyParser.json())
-
-app.set("view engine", "pug");
-
-app.get("/", (req, res) => res.send("Hello World!"));
-app.get("/registration", (req, res) => res.render("registration"));
-app.post("/registration", (req, res) => {
-  res.json(req.body);
+// Connect to db
+mongoose.connect(process.env.DATABASE);
+mongoose.Promise = global.Promise; // use ES6 promises
+mongoose.connection.on('error', (err) => {
+  console.error(`mongoose error ${err.message}`);
 });
 
-app.listen(port, () => console.log(`App listening on port ${port}!`));
+// import model
+require('./models/User');
+
+// Start our app!
+const app = require('./app');
+app.set('port', process.env.PORT || 3000);
+const server = app.listen(app.get('port'), () => {
+  console.log(`Express running → PORT ${server.address().port}`);
+});

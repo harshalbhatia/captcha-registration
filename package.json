@@ -19,8 +19,20 @@
   "homepage": "https://github.com/harshalbhatia/captcha-registration#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^2.0.3",
+    "date-fns": "^1.30.1",
+    "dotenv": "^7.0.0",
+    "es6-promisify": "^6.0.1",
     "express": "^4.16.4",
+    "express-session": "^1.16.1",
+    "express-validator": "^5.3.1",
+    "md5": "^2.2.1",
+    "mongoose": "^5.5.2",
+    "mongoose-mongodb-errors": "0.0.2",
     "nodemon": "^1.18.11",
+    "passport": "^0.4.0",
+    "passport-local-mongoose": "^5.0.1",
     "pug": "^2.0.3"
   }
 }
