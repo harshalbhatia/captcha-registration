@@ -1,0 +1,26 @@
+{
+  "name": "captcha-registration",
+  "version": "1.0.0",
+  "description": "captcha-registration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshalbhatia/captcha-registration.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harshalbhatia/captcha-registration/issues"
+  },
+  "homepage": "https://github.com/harshalbhatia/captcha-registration#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.11",
+    "pug": "^2.0.3"
+  }
+}
