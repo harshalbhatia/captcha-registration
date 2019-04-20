@@ -4,6 +4,7 @@ Simple registration page with Recaptcha using Node, Express, MongoDB, Mongoose, 
 
 ### Install
 #### Make sure Mongo is installed and running
+    mongo
 #### Setup environment variables
     mv variables.env.example variables.env
 #### Install Dependencies
