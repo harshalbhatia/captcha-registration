@@ -2,12 +2,14 @@ const mongoose = require("mongoose");
 const User = mongoose.model("User");
 const IpAddress = mongoose.model("IpAddress");
 const promisify = require("es6-promisify");
+var reCAPTCHA = require("recaptcha2");
 
-exports.home = (req, res) => {
-  res.send("You might want to go to /register maybe");
-};
+var recaptcha = new reCAPTCHA({
+  siteKey: process.env.RECAPTCHA_SITEKEY,
+  secretKey: process.env.RECAPTCHA_SECRETKEY
+});
 
-exports.checkCaptcha = async (req, res, next) => {
+const captchaEligible = async req => {
   const thisUser = await IpAddress.findOne(
     { ipAddress: req.ip },
     "logins",
@@ -15,8 +17,16 @@ exports.checkCaptcha = async (req, res, next) => {
       err && console.log("err", err, res);
     }
   );
-  const loginsToday = thisUser.loginsToday;
-  console.log(loginsToday, "sadf");
+  return !!(thisUser && thisUser.loginsToday >= 3);
+};
+
+exports.home = (req, res) => {
+  res.send("You might want to go to /registration maybe");
+};
+
+exports.checkCaptcha = async (req, res, next) => {
+  const showCaptcha = await captchaEligible(req);
+  res.locals.checkCaptcha = !!showCaptcha;
   next();
 };
 
@@ -24,7 +34,28 @@ exports.registerForm = (req, res) => {
   res.render("registration");
 };
 
-exports.validateRegister = (req, res, next) => {
+exports.validateCaptcha = async (req, res, next) => {
+  const checkCaptcha = await captchaEligible(req);
+  checkCaptcha &&
+    recaptcha
+      .validateRequest(req)
+      .then(function() {
+        next();
+      })
+      .catch(async errorCodes => {
+        // invalid
+        const checkCaptcha = await captchaEligible(req);
+        req.flash("error", "Captcha is not valid");
+        res.render("registration", {
+          flashes: req.flash(),
+          checkCaptcha: checkCaptcha
+        });
+        return; // stop running
+      });
+  next();
+};
+
+exports.validateRegister = async (req, res, next) => {
   req.sanitizeBody("name");
   req.checkBody("name", "You must supply a name!").notEmpty();
   req.checkBody("email", "That Email is not valid!").isEmail();
@@ -41,8 +72,12 @@ exports.validateRegister = (req, res, next) => {
 
   const errors = req.validationErrors();
   if (errors) {
+    const checkCaptcha = await captchaEligible(req);
     req.flash("error", errors.map(err => err.msg));
-    res.render("registration", { flashes: req.flash() });
+    res.render("registration", {
+      flashes: req.flash(),
+      checkCaptcha: checkCaptcha
+    });
     return; // stop running
   }
   next();
@@ -51,8 +86,19 @@ exports.validateRegister = (req, res, next) => {
 exports.register = async (req, res, next) => {
   const user = new User({ email: req.body.email, name: req.body.name });
   const register = promisify(User.register, User);
-  await register(user, req.body.password);
-  next();
+  return await register(user, req.body.password)
+    .then(() => {
+      next();
+    })
+    .catch(async err => {
+      const checkCaptcha = await captchaEligible(req);
+      req.flash("error", err);
+      res.render("registration", {
+        flashes: req.flash(),
+        checkCaptcha: checkCaptcha
+      });
+      return;
+    });
 };
 
 exports.logIP = async (req, res, next) => {
@@ -68,5 +114,10 @@ exports.logIP = async (req, res, next) => {
       err && console.log("err", err, res);
     }
   ).exec();
-  next();
+  const checkCaptcha = await captchaEligible(req);
+  req.flash("success", "Successfully registered.");
+  res.render("registration", {
+    flashes: req.flash(),
+    checkCaptcha: checkCaptcha
+  });
 };

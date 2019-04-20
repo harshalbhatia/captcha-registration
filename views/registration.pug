@@ -1,6 +1,7 @@
 html
   head
     title Registration Page
+    script(src="https://www.google.com/recaptcha/api.js" async defer)
   body
     h1 Registration Page
     if locals.flashes
@@ -27,5 +28,8 @@ html
       div
         label(for="password-confirm") Confirm Password
         input(type="password" id="password-confirm" name="password-confirm")
+      |
+      if locals.checkCaptcha
+        div(class="g-recaptcha" data-sitekey=locals.siteKey)
       div(class="button")
         button(type="submit") Send your message

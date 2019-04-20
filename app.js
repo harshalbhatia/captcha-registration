@@ -34,6 +34,7 @@ app.use(passport.session());
 // pass flashes
 app.use((req, res, next) => {
   res.locals.flashes = req.flash();
+  res.locals.siteKey = process.env.RECAPTCHA_SITEKEY;
   next();
 });
 

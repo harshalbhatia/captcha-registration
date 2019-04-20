@@ -5,6 +5,12 @@ const controller = require("../controllers");
 router.get("/", controller.home);
 
 router.get("/registration", controller.checkCaptcha, controller.registerForm);
-router.post("/registration", controller.validateRegister, controller.register, controller.logIP);
+router.post(
+  "/registration",
+  controller.validateCaptcha,
+  controller.validateRegister,
+  controller.register,
+  controller.logIP
+);
 
 module.exports = router;
