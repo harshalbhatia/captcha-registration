@@ -8,7 +8,15 @@ exports.home = (req, res) => {
 };
 
 exports.checkCaptcha = async (req, res, next) => {
-  // TODO
+  const thisUser = await IpAddress.findOne(
+    { ipAddress: req.ip },
+    "logins",
+    (err, res) => {
+      err && console.log("err", err, res);
+    }
+  );
+  const loginsToday = thisUser.loginsToday;
+  console.log(loginsToday, "sadf");
   next();
 };
 
@@ -55,9 +63,9 @@ exports.logIP = async (req, res, next) => {
     {
       $push: { logins: new Date() }
     },
-    { 'new': true, 'runValidators': true, 'upsert': true },
+    { new: true, runValidators: true, upsert: true },
     (err, res) => {
-      console.log("ERRAR", err, res);
+      err && console.log("err", err, res);
     }
   ).exec();
   next();
